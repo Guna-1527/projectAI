@@ -11,7 +11,28 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import {initializeApp, getApps} from "firebase/app";
-import { firebaseConfig } from './firebaseConfig';
+
+// Initialize Firebase app if not already initialized
+let firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+};
+
+let firebaseApp;
+if (!getApps().length && firebaseConfig.apiKey) {
+  try {
+    firebaseApp = initializeApp(firebaseConfig);
+  } catch (error: any) {
+    console.error("Firebase initialization error", error.message);
+  }
+}
+
+const auth = firebaseApp ? getAuth(firebaseApp) : null;
 
 interface AuthContextProps {
   user: any;
@@ -29,18 +50,27 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
+    if (!auth) {
+      setIsLoading(false);
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [auth]);
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(getAuth(), provider);
+      if (auth) {
+        await signInWithPopup(auth, provider);
+      } else {
+        throw new Error("Firebase auth is not initialized.");
+      }
     } catch (error) {
       console.error("Google sign-in error", error);
       throw error;
@@ -49,7 +79,11 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
   const signInWithEmailAndPassword = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(getAuth(), email, password);
+      if (auth) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        throw new Error("Firebase auth is not initialized.");
+      }
     } catch (error) {
       console.error("Email sign-in error", error);
       throw error;
@@ -58,7 +92,11 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
   const createUserWithEmailAndPassword = async (email: string, password: string) => {
     try {
-      await createUserWithEmailAndPassword(getAuth(), email, password);
+      if (auth) {
+        await createUserWithEmailAndPassword(auth, email, password);
+      } else {
+        throw new Error("Firebase auth is not initialized.");
+      }
     } catch (error) {
       console.error("Registration error", error);
       throw error;
@@ -67,7 +105,11 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
   const signOutFunc = async () => {
     try {
-      await signOut(getAuth());
+      if (auth) {
+        await signOut(auth);
+      } else {
+        throw new Error("Firebase auth is not initialized.");
+      }
     } catch (error) {
       console.error("Sign-out error", error);
       throw error;
@@ -95,6 +137,8 @@ export const useAuth = () => {
 };
 
 export const useUser = () => {
-  const auth = useAuth();
-  return auth.user;
+  const authContext = useAuth();
+  return authContext.user;
 };
+
+    
