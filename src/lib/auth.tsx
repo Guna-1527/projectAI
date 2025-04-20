@@ -13,14 +13,14 @@ import {
 import {initializeApp, getApps} from "firebase/app";
 
 // Initialize Firebase app if not already initialized
-let firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyC_bXbnqni73XRn1u58KKDViSCrv94KTHs",
+  authDomain: "archaitect-l0w2t.firebaseapp.com",
+  projectId: "archaitect-l0w2t",
+  storageBucket: "archaitect-l0w2t.firebasestorage.app",
+  messagingSenderId: "229614740833",
+  appId: "1:229614740833:web:ab7c17fcd493c7d3f7d120"
 };
 
 let firebaseApp;
