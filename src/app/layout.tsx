@@ -3,6 +3,7 @@ import type {Metadata} from 'next';
 import {Inter, Geist_Mono} from 'next/font/google';
 import './globals.css';
 import {Toaster} from "@/components/ui/toaster";
+import {AuthProvider} from "@/lib/auth";
 
 const inter = Inter({
   variable: '--font-inter',
@@ -27,10 +28,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${geistMono.variable} antialiased`}>
-        {children}
-        <Toaster/>
+        <AuthProvider>
+          {children}
+          <Toaster/>
+        </AuthProvider>
       </body>
     </html>
   );
 }
+
 

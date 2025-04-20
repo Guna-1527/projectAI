@@ -26,6 +26,8 @@ import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, A
 import {cn} from "@/lib/utils";
 import {Skeleton} from "@/components/ui/skeleton";
 import Link from "next/link";
+import {useAuth, useUser} from "@/lib/auth";
+import {useRouter} from "next/navigation";
 
 const DashboardPage = () => {
   const [projectRequirements, setProjectRequirements] = useState("");
@@ -33,6 +35,24 @@ const DashboardPage = () => {
   const [erDiagram, setErDiagram] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const {toast} = useToast();
+  const {signOut} = useAuth();
+  const router = useRouter();
+  const user = useUser();
+  const auth = useAuth();
+
+  if (auth.isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Skeleton className="w-20 h-20 rounded-full"/>
+      </div>
+    );
+  }
+
+  if (!user) {
+    router.push('/login');
+    return null;
+  }
+
 
   const handleGenerate = async () => {
     setIsLoading(true);
@@ -66,6 +86,20 @@ const DashboardPage = () => {
         title: "SQL Code Copied",
         description: "SQL code has been copied to your clipboard.",
       });
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      router.push('/');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to log out.",
+        variant: "destructive",
+      });
+      console.error("Logout failed:", error);
     }
   };
 
@@ -108,7 +142,7 @@ const DashboardPage = () => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction>Logout</AlertDialogAction>
+                  <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -121,18 +155,18 @@ const DashboardPage = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="https://picsum.photos/50/50" alt="User Avatar"/>
-                    <AvatarFallback>AI</AvatarFallback>
+                    <AvatarImage src={user?.photoURL || "https://picsum.photos/50/50"} alt="User Avatar"/>
+                    <AvatarFallback>{user?.displayName?.charAt(0).toUpperCase() || 'AI'}</AvatarFallback>
                   </Avatar>
                   <span className="sr-only">Open user menu</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>
-                  <Link href="/" className="flex items-center space-x-2">
+                  <Button variant="ghost" onClick={handleLogout} className="flex items-center space-x-2">
                     <LogOut className="mr-2 h-4 w-4"/>
                     <span>Logout</span>
-                  </Link>
+                  </Button>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
