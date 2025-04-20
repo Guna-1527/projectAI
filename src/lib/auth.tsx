@@ -10,19 +10,8 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
-import {initializeApp} from "firebase/app";
+import {initializeApp, getApps} from "firebase/app";
 import { firebaseConfig } from './firebaseConfig';
-
-try {
-  initializeApp(firebaseConfig);
-} catch (e: any) {
-  // Ignore error if app is already initialized
-  if (e.code !== 'app/duplicate-app') {
-    console.error("Firebase initialization error", e);
-  }
-}
-
-const auth = getAuth();
 
 interface AuthContextProps {
   user: any;
@@ -40,7 +29,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       setUser(user);
       setIsLoading(false);
     });
@@ -51,7 +40,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      await signInWithPopup(getAuth(), provider);
     } catch (error) {
       console.error("Google sign-in error", error);
       throw error;
@@ -60,7 +49,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
   const signInWithEmailAndPassword = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(getAuth(), email, password);
     } catch (error) {
       console.error("Email sign-in error", error);
       throw error;
@@ -69,7 +58,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
   const createUserWithEmailAndPassword = async (email: string, password: string) => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      await createUserWithEmailAndPassword(getAuth(), email, password);
     } catch (error) {
       console.error("Registration error", error);
       throw error;
@@ -78,7 +67,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
   const signOutFunc = async () => {
     try {
-      await signOut(auth);
+      await signOut(getAuth());
     } catch (error) {
       console.error("Sign-out error", error);
       throw error;
